@@ -1,15 +1,24 @@
 package hello.core.order;
 
 import hello.core.discount.DiscountPolicy;
-import hello.core.discount.FixDiscountPolicy;
 import hello.core.member.Member;
 import hello.core.member.MemberRepository;
-import hello.core.member.MemoryMemberRepository;
 
 public class OrderServiceImpl implements OrderService{
 
-    private final MemberRepository memberRepository = new MemoryMemberRepository(); // 우선 메모리 사용
-    private final DiscountPolicy discountPolicy = new FixDiscountPolicy(); // 우선 고정 할인 정책
+    //private final MemberRepository memberRepository = new MemoryMemberRepository(); // 우선 메모리 사용
+    // private final DiscountPolicy discountPolicy = new FixDiscountPolicy(); // 우선 고정 할인 정책
+    // private final DiscountPolicy discountPolicy = new RateDiscountPolicy(); // 비율 할인 정책
+    // 위의 두 할인 정책은 DIP를 위반한다. Why? OrderService이 Discount interface에만 의존 해야하는데, 그것의 구현체인 Fix, Rate 에도 의존하기 때문
+    // 그래서 다음과 같이 DIP 원칙을 해결 할 수 있다
+
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy;
+
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
 
     @Override
     public Order createOrder(Long memberId, String itemName, int itemPrice) {
